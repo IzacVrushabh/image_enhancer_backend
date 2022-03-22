@@ -49,15 +49,14 @@ for image in path_list:
 # print("input-entropy", ent2)
 
 Avg_Entropy = []
-for image in read_images:
-    cv.imshow("Input-Image", image)
+    # cv.imshow("Input-Image", image)
     ie = image_enhancement.IE(image, color_space='HSV')
-    result1 = ie.RLBHE()
+    # result1 = ie.RLBHE()
     result2 = ie.DSIHE()
-    result3 = ie.BBHE()
+    # result3 = ie.BBHE()
     result4 = ie.BPHEME()
-    result5 = ie.MMBEBHE()
-    result6 = ie.FHSABP()
+    # result5 = ie.MMBEBHE()
+    # result6 = ie.FHSABP()
 
 
     # print("MMBEBHE", skimage.measure.shannon_entropy(result1))
