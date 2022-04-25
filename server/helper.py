@@ -70,7 +70,8 @@ def mask_image():
         b2, g2, r2 = cv2.split(result2)
         RESULT_image2 = (np.dstack((b2 * p2, g2 * p2, r2 * p2))).astype(np.uint8)
 
-        output_image = RESULT_image1 + RESULT_image2
+        op_image = RESULT_image1 + RESULT_image2
+        output_image = cv2.cvtColor(op_image, cv2.COLOR_BGR2RGB)
         os.chdir(directory)
         cv2.imwrite("outputImageFinal.png", output_image)  # use to store expected output image in the output folder
         # # cv2.imshow("output-image", output_image)
