@@ -17,6 +17,8 @@ import csv
 import os
 import imquality.brisque as brisque
 from PIL import Image
+import time
+import shutil
 import warnings
 from skimage import metrics
 
@@ -37,6 +39,15 @@ directory = r'D:\enhancerApp\outputImage'
 
 @app.route('/enhance' , methods=['POST'])
 def mask_image():
+    for filename in os.listdir(directory):
+        file_path = os.path.join(directory, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
     p2, q2 = 0.2, 0.8
     f = request.files['image']
     f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
@@ -73,7 +84,20 @@ def mask_image():
         op_image = RESULT_image1 + RESULT_image2
         output_image = cv2.cvtColor(op_image, cv2.COLOR_BGR2RGB)
         os.chdir(directory)
-        cv2.imwrite("outputImageFinal.png", output_image)  # use to store expected output image in the output folder
+
+
+        for filename in os.listdir(folder):
+            file_path = os.path.join(folder, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+        timestr = time.strftime("%Y%m%d-%H%M%S")
+
+        cv2.imwrite("outputImageFinal"+timestr+".png", output_image)  # use to store expected output image in the output folder
         # # cv2.imshow("output-image", output_image)
         output_img = Image.fromarray(output_image)
         rawBytes = io.BytesIO()
