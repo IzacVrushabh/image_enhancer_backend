@@ -50,6 +50,8 @@ def mask_image():
             print('Failed to delete %s. Reason: %s' % (file_path, e))
     p2, q2 = 0.2, 0.8
     f = request.files['image']
+    met1 = request.form['met1']
+    met2 = request.form['met2']
     f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
 
     path_list = []
@@ -72,17 +74,43 @@ def mask_image():
     for image in read_images:
         # cv2.imshow("Input-Image", image)
         ie = image_enhancement.IE(image, color_space='HSV')
-        result1 = ie.BBHE()
-        result2 = ie.BPHEME()
+        ip_ent = skimage.measure.shannon_entropy(image)
+        ip_brisque = brisque.score(image)
+        if met1 == 'RLBHE':
+            result1 = ie.RLBHE()
+        elif met1 == 'DSIHE':
+            result1 = ie.DSIHE()
+        elif met1 == 'BBHE':
+            result1 = ie.BBHE()
+        elif met1 == 'BPHEME':
+            result1 = ie.BPHEME()
+        elif met1 == 'FHSABP':
+            result1 = ie.FHSABP()
+        else:
+            result1 = ie.MMBEBHE()
 
+        if met2 == 'RLBHE':
+            result2 = ie.RLBHE()
+        elif met2 == 'DSIHE':
+            result2 = ie.DSIHE()
+        elif met1 == 'BBHE':
+            result2 = ie.BBHE()
+        elif met2 == 'BPHEME':
+            result2 = ie.BPHEME()
+        elif met2 == 'FHSABP':
+            result2 = ie.FHSABP()
+        else:
+            result2 = ie.MMBEBHE()
         b1, g1, r1 = cv2.split(result1)
-        RESULT_image1 = (np.dstack((b1 * q2, g1 * q2, r1 * q2))).astype(np.uint8)
+        result_image1 = (np.dstack((b1 * q2, g1 * q2, r1 * q2))).astype(np.uint8)
 
         b2, g2, r2 = cv2.split(result2)
-        RESULT_image2 = (np.dstack((b2 * p2, g2 * p2, r2 * p2))).astype(np.uint8)
+        result_image2 = (np.dstack((b2 * p2, g2 * p2, r2 * p2))).astype(np.uint8)
 
-        op_image = RESULT_image1 + RESULT_image2
+        op_image = result_image1 + result_image2
         output_image = cv2.cvtColor(op_image, cv2.COLOR_BGR2RGB)
+        output_ent = skimage.measure.shannon_entropy(output_image)
+        output_brisque = brisque.score(output_image)
         os.chdir(directory)
 
 
@@ -95,18 +123,16 @@ def mask_image():
                     shutil.rmtree(file_path)
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
-        timestr = time.strftime("%Y%m%d-%H%M%S")
-
-        cv2.imwrite("outputImageFinal"+timestr+".png", output_image)  # use to store expected output image in the output folder
+        time_str = time.strftime("%Y%m%d-%H%M%S")
+        cv2.imwrite("outputImageFinal"+time_str+".png", output_image)  # use to store expected output image in the output folder
         # # cv2.imshow("output-image", output_image)
         output_img = Image.fromarray(output_image)
-        rawBytes = io.BytesIO()
-        output_img.save(rawBytes, "PNG")
-        rawBytes.seek(0)  # major problem....
+        raw_bytes = io.BytesIO()
+        output_img.save(raw_bytes, "PNG")
+        raw_bytes.seek(0)  # major problem....
         # response_image = base64.b64encode(output_image).decode('utf-8')
-        img_base64 = base64.b64encode(rawBytes.read())
-
-        return jsonify({'status': str(img_base64), 'ip_ent': '0', 'op_ent': '0', 'ip_brisque': '0', 'op_brisque': '0'})
+        img_base64 = base64.b64encode(raw_bytes.read())
+        return jsonify({'status': str(img_base64), 'ip_ent': ip_ent, 'op_ent': '0', 'ip_brisque': ip_brisque, 'op_brisque': '0'})
 
     # return 'file uploaded successfully'
     # fusionValue = request.form['fusion_params']
