@@ -22,11 +22,11 @@ path_list = []
 folder = 'D:\Android_Projects\OceanDark\TempFolder'
 
 names_list = []
-for f in glob.glob(folder+'/*.jpg'):
+for f in glob.glob(folder+'/*.png'):
     names_list.append(os.path.split(f)[-1])
 # print(names_list)
 
-for f in glob.glob(folder+'/*.jpg'):
+for f in glob.glob(folder+'/*.png'):
     path_list.append(f)
 
 # print(path_list)

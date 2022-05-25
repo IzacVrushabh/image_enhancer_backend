@@ -48,7 +48,10 @@ def mask_image():
                 shutil.rmtree(file_path)
         except Exception as e:
             print('Failed to delete %s. Reason: %s' % (file_path, e))
-    p2, q2 = 0.2, 0.8
+    # print("fusion_value", request.form['fusion_params'])
+    p2 = float(request.form['fusion_params'])
+    q2 = 1 - float(p2)
+    # print(p2, q2)
     f = request.files['image']
     met1 = request.form['met1']
     met2 = request.form['met2']
@@ -59,11 +62,11 @@ def mask_image():
 
     folder = "D:\enhancerApp\image"
 
-    for f in glob.glob(folder + '/*.jpg'):
+    for f in glob.glob(folder + '/*.png'):
         names_list.append(os.path.split(f)[-1])
     # print(names_list)
 
-    for f in glob.glob(folder + '/*.jpg'):
+    for f in glob.glob(folder + '/*.png'):
         path_list.append(f)
     # print(path_list)
 
@@ -124,7 +127,7 @@ def mask_image():
             except Exception as e:
                 print('Failed to delete %s. Reason: %s' % (file_path, e))
         time_str = time.strftime("%Y%m%d-%H%M%S")
-        cv2.imwrite("outputImageFinal"+time_str+".png", output_image)  # use to store expected output image in the output folder
+        cv2.imwrite("outputImageFinal"+time_str+".jpg", output_image)  # use to store expected output image in the output folder
         # # cv2.imshow("output-image", output_image)
         output_img = Image.fromarray(output_image)
         raw_bytes = io.BytesIO()
@@ -132,83 +135,9 @@ def mask_image():
         raw_bytes.seek(0)  # major problem....
         # response_image = base64.b64encode(output_image).decode('utf-8')
         img_base64 = base64.b64encode(raw_bytes.read())
-        return jsonify({'status': str(img_base64), 'ip_ent': ip_ent, 'op_ent': '0', 'ip_brisque': ip_brisque, 'op_brisque': '0'})
+        return jsonify({'status': str(img_base64), 'ip_ent': ip_ent, 'op_ent': output_ent, 'ip_brisque': ip_brisque, 'op_brisque': output_brisque})
 
     # return 'file uploaded successfully'
-    # fusionValue = request.form['fusion_params']
-    # p2, q2 = 0.2, 0.8
-    # met1 = request.form['met1']
-    # met2 = request.form['met2']
-    # file = request.files['image'].read() ## byte file
-    # rawBytes = io.BytesIO()
-    # input_img = Image.fromarray(file)
-    # input_img.save(rawBytes, format="JPG")
-    # picture = input_img.save("dolls.jpg")
-    #
-    # return jsonify({'status': 'ok'})
-    #
-    #
-    # npimg = np.fromstring(file, np.uint8)
-    # img = cv2.imdecode(npimg,cv2.IMREAD_COLOR)
-    # # print(npimg)
-    # RGB_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    # ie = image_enhancement.IE(RGB_img, color_space='RGB')
-    #
-    # ip_ent = skimage.measure.shannon_entropy(RGB_img)
-    # ip_brisque = brisque.score(RGB_img)
-    #
-    # result1 = ""
-    # result2 = ""
-    #
-    # if met1 == 'RLBHE':
-    #  result1 = ie.RLBHE()
-    # elif met1 == 'DSIHE':
-    #  result1 = ie.DSIHE()
-    # elif met1 == 'BBHE':
-    #  result1 = ie.BBHE()
-    # elif met1 == 'BPHEME':
-    #  result1 = ie.BPHEME()
-    # elif met1 == 'FHSABP':
-    #  result1 = ie.FHSABP()
-    # else:
-    #  result1 = ie.MMBEBHE()
-    #
-    # if met2 == 'RLBHE':
-    #  result2 = ie.RLBHE()
-    # elif met2 == 'DSIHE':
-    #  result2 = ie.DSIHE()
-    # elif met1 == 'BBHE':
-    #  result2 = ie.BBHE()
-    # elif met2 == 'BPHEME':
-    #  result2 = ie.BPHEME()
-    # elif met2 == 'FHSABP':
-    #  result2 = ie.FHSABP()
-    # else:
-    #  result2 = ie.MMBEBHE()
-    #
-    # b1, g1, r1 = cv2.split(result1)
-    # RESULT_image1 = (np.dstack((b1 * q2, g1 * q2, r1 * q2))).astype(np.uint8)
-    #
-    # b2, g2, r2 = cv2.split(result2)
-    # RESULT_image2 = (np.dstack((b2 * p2, g2 * p2, r2 * p2))).astype(np.uint8)
-    #
-    # output_image = RESULT_image1 + RESULT_image2
-    #
-    # output_ent = skimage.measure.shannon_entropy(output_image)
-    #
-    # output_img = Image.fromarray(output_image)
-    #
-    # output_brisque = brisque.score(output_img)
-    #
-    # # output_psnr = metrics.peak_signal_noise_ratio(img, output_img)
-    #
-    # rawBytes = io.BytesIO()
-    # # print(rawBytes)
-    # output_img.save(rawBytes, format="PNG")
-    # rawBytes.seek(0)
-    # img_base64 = base64.b64encode(rawBytes.read())
-    # # print(img_base64)
-    # return jsonify({'status': str(img_base64), 'ip_ent': ip_ent, 'op_ent': output_ent, 'ip_brisque': ip_brisque, 'op_brisque': output_brisque})
 
 @app.after_request
 def after_request(response):
